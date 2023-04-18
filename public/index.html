@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upload Game</title>
+  </head>
+  <body>
+    <h1>Upload Game</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="text" id="name" name="name" placeholder="name" />
+      <input type="text" id="category" name="category" placeholder="category" />
+      <input
+        type="text"
+        id="description"
+        name="description"
+        placeholder="description"
+      />
+      <input type="text" id="control" name="control" placeholder="control" />
+      <div>
+        <label for="source-code">Upload files:</label>
+        <input
+          type="file"
+          id="source-code"
+          name="source-code"
+          webkitdirectory
+          directory
+          multiple
+        />
+      </div>
+      <div id="listing"></div>
+      <div>
+        <label for="cover-image">Upload cover image:</label>
+        <input
+          type="file"
+          id="cover-image"
+          name="cover-image"
+          accept=".jpg, .jpeg, .png"
+        />
+      </div>
+      <button type="submit">Upload</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+    <script>
+      const form = document.getElementById("upload-form");
+      const nameInput = document.getElementById("name");
+      const categoryInput = document.getElementById("category");
+      const descriptionInput = document.getElementById("description");
+      const controlInput = document.getElementById("control");
+      const filesInput = document.getElementById("source-code");
+      const coverImageFileInput = document.getElementById("cover-image");
+      const fileList = document.getElementById("listing");
+
+      filesInput.addEventListener(
+        "change",
+        (event) => {
+          for (const file of event.target.files) {
+            const item = document.createElement("li");
+            item.textContent = file.webkitRelativePath;
+            fileList.appendChild(item);
+          }
+        },
+        false
+      );
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await uploadInfo();
+        await uploadSourceCode();
+        await uploadCoverImage();
+      });
+
+      const uploadInfo = async () => {
+        const formData = new FormData();
+        formData.append("name", nameInput.value);
+        formData.append("category", categoryInput.value);
+        formData.append("description", descriptionInput.value);
+        formData.append("control", controlInput.value);
+
+        await fetch("http://localhost:3001/api/upload/info", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.text())
+          .then((data) => console.log(data))
+          .catch((err) => console.log(err));
+      };
+
+      const uploadSourceCode = async () => {
+        // Lấy thông tin file upload
+        const files = Array.from(filesInput.files);
+
+        // Tạo đối tượng ZIP và thêm các file vào
+        const zip = new JSZip();
+        await Promise.all(
+          files.map(async (file) => {
+            const data = await file.arrayBuffer();
+            zip.file(file.webkitRelativePath, data);
+          })
+        );
+
+        // Tạo file zip và gửi đến server Node.js
+        const zipData = await zip.generateAsync({ type: "arraybuffer" });
+        const zipFile = new File([zipData], "upload.zip");
+        const formData = new FormData();
+        formData.append("source-code", zipFile);
+
+        await fetch("http://localhost:3001/api/upload/source-code", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.text())
+          .then((data) => console.log(data))
+          .catch((err) => console.log(err));
+      };
+
+      const uploadCoverImage = async () => {
+        const coverImageFile = coverImageFileInput.files[0];
+        const formData = new FormData();
+        formData.append("cover-image", coverImageFile);
+
+        await fetch("http://localhost:3001/api/upload/cover-image", {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.text())
+          .then((data) => console.log(data))
+          .catch((err) => console.log(err));
+      };
+    </script>
+  </body>
+</html>

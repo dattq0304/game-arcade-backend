@@ -1,12 +1,20 @@
 const express = require("express");
-const app = express();
-
+const path = require("path");
 require("dotenv").config();
-const port = process.env.PORT;
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const router = require("../routes");
 
-app.use(router);
+const app = express();
+const port = process.env.PORT;
+
+app.use(cors()); // enable CORS for all routes
+app.use(express.static(path.join(__dirname, "public")));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use("/api", router);
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);
