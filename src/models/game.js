@@ -10,30 +10,10 @@ mongoose.connect(databaseUrl, {
   useUnifiedTopology: true,
 });
 
-/*
-{
-    "_id" : "dfjashdfjhashdfjhas",
-    "name" : "First Game",
-    "category" : [
-        "2 players",
-        "action"
-    ],
-    "creator_id" : "_",
-    "active" : false,
-    "control" : "awds",
-    "create_date" : ISODate("2023-04-17T00:00:00.000+0000"),
-    "description" : "First Game",
-    "modified_date" : ISODate("2023-04-17T00:00:00.000+0000"),
-    "type" : "HTML5",
-    "path" : "_"
-}
-*/
-
 const GameSchema = new Schema(
   {
-    _id: String,
     name: String,
-    category: Array,
+    category: String,
     creator_id: String,
     active: Boolean,
     control: String,

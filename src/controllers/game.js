@@ -1,0 +1,130 @@
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+
+const GameModel = require("../models/game");
+
+const storagePath = process.env.PATH_TO_STORAGE;
+const sourceCodeStoragePath = path.join(storagePath, "source-code");
+const coverImageStoragePath = path.join(storagePath, "cover-image");
+
+// Get game info
+const getGameInfo = (req, res) => {
+  try {
+    const id = req.params.id;
+
+    GameModel.findById(id)
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Get all game info
+const getAllGameInfo = (req, res) => {
+  try {
+    GameModel.find({})
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Get run game file
+const getRunGameFile = (req, res) => {
+  const id = req.params.id;
+  const gameFilePath = path.join(sourceCodeStoragePath, id, "index.html");
+
+  if (fs.existsSync(gameFilePath)) {
+    res.status(200).sendFile(gameFilePath);
+  } else {
+    res.status(404).send("Game not found");
+  }
+};
+
+// Delete game by id
+const deleteGameById = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const response = await GameModel.findByIdAndRemove(id);
+    deleteCoverImage(response._id.toString());
+    if (response.type === "HTML5") {
+      deleteSourceCode(response._id.toString());
+    }
+
+    res.status(200).send("Succesful delete game");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const deleteCoverImage = (id) => {
+  try {
+    const imageExtensions = ["jpg", "png", "jpeg"];
+    imageExtensions.forEach((ext) => {
+      const imagePath = path.join(coverImageStoragePath, id + "." + ext);
+      if (fs.existsSync(imagePath)) {
+        fs.unlink(imagePath, (err) => {});
+      }
+    });
+  } catch (err) {
+    console.log("Can not delete image", err);
+  }
+};
+
+const deleteSourceCode = (id) => {
+  try {
+    fs.rmSync(path.join(sourceCodeStoragePath, id), {
+      recursive: true,
+      force: false,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// Update game
+const updateGame = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const newGame = req.body;
+    const oldGame = await GameModel.findById(id);
+    const response = await GameModel.findByIdAndUpdate(id, {
+      name: newGame.name,
+      category: newGame.category,
+      description: newGame.description,
+      control: newGame.control,
+      modified_date: new Date().toISOString(),
+      type: newGame.type,
+      path: newGame.type === "Iframe link" ? newGame.link : "",
+    });
+
+    deleteCoverImage(id);
+    if (oldGame.type === "HTML5") {
+      deleteSourceCode(id);
+    }
+
+    res.status(200).send("Modified game successfully!");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+module.exports = {
+  getGameInfo,
+  getRunGameFile,
+  getAllGameInfo,
+  deleteGameById,
+  updateGame,
+};

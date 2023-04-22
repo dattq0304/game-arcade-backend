@@ -1,24 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
-const fs = require("fs");
 
-const storagePath = process.env.PATH_TO_STORAGE;
-const sourceCodeStoragePath = path.join(storagePath, "source-code");
+const gameFilesStatic = require("../src/middlewares/gameFilesStatic");
+const gameController = require("../src/controllers/game");
 
-router.get("/:gameId/index.html", (req, res) => {
-  const gameId = req.params.gameId;
-  const gameFilePath = path.join(sourceCodeStoragePath, gameId, "index.html");
+router.get(
+  "/:id/index.html",
+  (req, res, next) => {
+    gameFilesStatic(req, router);
+    next();
+  },
+  gameController.getRunGameFile
+);
+router.get("/:id", gameController.getGameInfo);
+router.get("/", gameController.getAllGameInfo);
 
-  if (fs.existsSync(gameFilePath)) {
-    router.use(
-      `/${gameId}`,
-      express.static(path.join(sourceCodeStoragePath, gameId), { index: false })
-    );
-    res.sendFile(gameFilePath);
-  } else {
-    res.status(404).send("Game not found");
-  }
-});
+router.put("/:id", gameController.updateGame);
+
+router.delete("/:id", gameController.deleteGameById);
 
 module.exports = router;

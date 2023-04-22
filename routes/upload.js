@@ -6,25 +6,18 @@ const multer = require("multer");
 const upload = require("../src/middlewares/upload");
 const uploadController = require("../src/controllers/upload");
 
-let gameId;
-
 router.post("/info", multer().fields([]), uploadController.uploadInfo);
 
 router.post(
-  "/source-code",
+  "/source-code/:id",
   upload("source-code").single("source-code"),
-  (req, res) => {
-    gameId = new ObjectId().toString();
-    uploadController.uploadSourceCode(req, res, gameId);
-  }
+  uploadController.uploadSourceCode
 );
 
 router.post(
-  "/cover-image",
+  "/cover-image/:id",
   upload("cover-image").single("cover-image"),
-  (req, res) => {
-    uploadController.uploadCoverImage(req, res, gameId);
-  }
+  uploadController.uploadCoverImage
 );
 
 module.exports = router;
