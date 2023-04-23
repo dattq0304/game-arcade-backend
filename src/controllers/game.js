@@ -103,6 +103,22 @@ const getGamesByCreator = async (req, res) => {
   }
 };
 
+// Get cover image
+const getCoverImage = (req, res) => {
+  try {
+    const id = req.params.id;
+    const imageExtensions = ["jpg", "png", "jpeg"];
+    imageExtensions.forEach((ext) => {
+      const imagePath = path.join(coverImageStoragePath, id + "." + ext);
+      if (fs.existsSync(imagePath)) {
+        res.status(200).sendFile(imagePath);
+      }
+    });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 // Get run game file
 const getRunGameFile = (req, res) => {
   const id = req.params.id;
@@ -186,12 +202,13 @@ const updateGame = async (req, res) => {
 
 module.exports = {
   getGameInfo,
-  getRunGameFile,
   getAllGameInfo,
   getNewGames,
   getRandomGames,
   getGamesByCategory,
   getGamesByCreator,
+  getRunGameFile,
+  getCoverImage,
   deleteGameById,
   updateGame,
 };
