@@ -40,6 +40,69 @@ const getAllGameInfo = (req, res) => {
   }
 };
 
+// Get new games
+const getNewGames = async (req, res) => {
+  try {
+    GameModel.find({})
+      .sort({ create_date: -1 })
+      .limit(10)
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Get random games
+const getRandomGames = async (req, res) => {
+  try {
+    const games = await GameModel.aggregate([{ $sample: { size: 10 } }]);
+    res.status(200).send(games);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Get games by category
+const getGamesByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
+    GameModel.find({ category: category })
+      .sort({ create_date: -1 })
+      .limit(10)
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Get games uploaded by creator_id
+const getGamesByCreator = async (req, res) => {
+  try {
+    const id = req.params.id;
+    GameModel.find({ creator_id: id })
+      .sort({ create_date: -1 })
+      .limit(50)
+      .then((response) => {
+        res.status(200).send(response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 // Get run game file
 const getRunGameFile = (req, res) => {
   const id = req.params.id;
@@ -87,7 +150,7 @@ const deleteSourceCode = (id) => {
   try {
     fs.rmSync(path.join(sourceCodeStoragePath, id), {
       recursive: true,
-      force: false,
+      force: true,
     });
   } catch (err) {
     console.log(err);
@@ -125,6 +188,10 @@ module.exports = {
   getGameInfo,
   getRunGameFile,
   getAllGameInfo,
+  getNewGames,
+  getRandomGames,
+  getGamesByCategory,
+  getGamesByCreator,
   deleteGameById,
   updateGame,
 };
