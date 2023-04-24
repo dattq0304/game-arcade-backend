@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { ObjectId } = require("mongodb");
 const multer = require("multer");
+const path = require("path");
 
 const upload = require("../src/middlewares/upload");
 const uploadController = require("../src/controllers/upload");
+
+router.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/upload.html"));
+});
 
 router.post("/info", multer().fields([]), uploadController.uploadInfo);
 
