@@ -4,7 +4,7 @@ const path = require("path");
 const storagePath = process.env.PATH_TO_STORAGE;
 const sourceCodeStoragePath = path.join(storagePath, "source-code");
 
-const gameFilesStatic = (req, router) => {
+const gameFiles = (req, router) => {
   let id = req.params.id;
   router.use(
     `/${id}`,
@@ -12,4 +12,4 @@ const gameFilesStatic = (req, router) => {
   );
 };
 
-module.exports = gameFilesStatic;
+module.exports = gameFiles;

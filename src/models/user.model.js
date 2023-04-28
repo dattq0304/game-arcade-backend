@@ -12,12 +12,10 @@ mongoose.connect(databaseUrl, {
 
 const UserSchema = new Schema(
   {
-    _id: String,
     username: String,
     password: String,
     email: String,
-    role: String,
-    gameUploadedId: Array,
+    role: String
   },
   {
     collection: "Users",

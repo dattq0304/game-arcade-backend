@@ -1,10 +1,9 @@
-// uploadMiddleware.js
 const multer = require("multer");
 const path = require("path");
 
 const storagePath = process.env.PATH_TO_STORAGE;
 
-const createUploadMiddleware = (folderName) => {
+const uploadMiddleware = (folderName) => {
   const uploadStoragePath = path.join(storagePath, folderName);
 
   const uploadStorage = multer.diskStorage({
@@ -19,4 +18,4 @@ const createUploadMiddleware = (folderName) => {
   return multer({ storage: uploadStorage });
 };
 
-module.exports = createUploadMiddleware;
+module.exports = uploadMiddleware;

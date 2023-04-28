@@ -1,8 +1,7 @@
-const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
-const GameModel = require("../models/game");
+const { GameModel } = require("../models");
 
 const storagePath = process.env.PATH_TO_STORAGE;
 const sourceCodeStoragePath = path.join(storagePath, "source-code");
@@ -14,10 +13,10 @@ const getGameInfo = (req, res) => {
     const id = req.params.id;
 
     GameModel.findById(id)
-      .then((response) => {
+      .then(response => {
         res.status(200).send(response);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   } catch (err) {
@@ -29,10 +28,10 @@ const getGameInfo = (req, res) => {
 const getAllGameInfo = (req, res) => {
   try {
     GameModel.find({})
-      .then((response) => {
+      .then(response => {
         res.status(200).send(response);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   } catch (err) {
@@ -46,10 +45,10 @@ const getNewGames = async (req, res) => {
     GameModel.find({})
       .sort({ create_date: -1 })
       .limit(10)
-      .then((response) => {
+      .then(response => {
         res.status(200).send(response);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   } catch (err) {
@@ -74,10 +73,10 @@ const getGamesByCategory = async (req, res) => {
     GameModel.find({ category: category })
       .sort({ create_date: -1 })
       .limit(10)
-      .then((response) => {
+      .then(response => {
         res.status(200).send(response);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   } catch (err) {
@@ -92,10 +91,10 @@ const getGamesByCreator = async (req, res) => {
     GameModel.find({ creator_id: id })
       .sort({ create_date: -1 })
       .limit(50)
-      .then((response) => {
+      .then(response => {
         res.status(200).send(response);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   } catch (err) {
@@ -154,7 +153,7 @@ const deleteCoverImage = (id) => {
     imageExtensions.forEach((ext) => {
       const imagePath = path.join(coverImageStoragePath, id + "." + ext);
       if (fs.existsSync(imagePath)) {
-        fs.unlink(imagePath, (err) => {});
+        fs.unlink(imagePath, (err) => { });
       }
     });
   } catch (err) {

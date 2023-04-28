@@ -3,9 +3,8 @@ const fs = require("fs");
 const unzipper = require("unzipper");
 const path = require("path");
 
-const GameModel = require("../models/game");
+const { GameModel } = require("../models");
 
-const port = process.env.PORT;
 const storagePath = process.env.PATH_TO_STORAGE;
 const sourceCodeStoragePath = path.join(storagePath, "source-code");
 

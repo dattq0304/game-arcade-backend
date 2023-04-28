@@ -1,7 +1,9 @@
-const uploadCoverImage = require("./uploadCoverImage");
-const uploadSourceCode = require("./uploadSourceCode");
+const uploadMiddleware = require("./upload.middleware");
+// const authMiddleware = require("./auth.middleware");
+const gameFilesMiddleware = require("./gameFiles.middleware");
 
 module.exports = {
-  uploadCoverImage,
-  uploadSourceCode,
+  uploadMiddleware,
+  // authMiddleware,
+  gameFilesMiddleware
 };

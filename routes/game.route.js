@@ -1,8 +1,9 @@
 const express = require("express");
-const router = express.Router();
 
-const gameFilesStatic = require("../src/middlewares/gameFilesStatic");
-const gameController = require("../src/controllers/game");
+const { gameFilesMiddleware } = require('../src/middlewares');
+const { gameController } = require('../src/controllers');
+
+const router = express.Router();
 
 router.get("/new", gameController.getNewGames);
 router.get("/random", gameController.getRandomGames);
@@ -12,7 +13,7 @@ router.get("/image/:id", gameController.getCoverImage);
 router.get(
   "/:id/index.html",
   (req, res, next) => {
-    gameFilesStatic(req, router);
+    gameFilesMiddleware(req, router);
     next();
   },
   gameController.getRunGameFile
