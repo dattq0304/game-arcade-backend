@@ -7,4 +7,4 @@ const router = express.Router();
 //   res.sendFile(path.join(__dirname, "../public/index.html"));
 // });
 
-module.exports.default = router;
+module.exports = router;

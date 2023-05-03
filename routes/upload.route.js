@@ -2,12 +2,12 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
-const { uploadMiddleware } = require("../src/middlewares");
+const { uploadMiddleware, authMiddleware } = require("../src/middlewares");
 const { uploadController } = require("../src/controllers");
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, "../public/upload.html"));
 });
 

@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>Sign up</title>
   </head>
   <body>
     Username: <input type="text" id="username" /> <br />
+    Email: <input type="text" id="email" /> <br />
     Password: <input type="text" id="password" /> <br />
     <button onclick="login()">Login</button>
   </body>
@@ -36,9 +37,10 @@
     };
 
     const login = () => {
-      const url = "http://localhost:3001/api/user/login";
+      const url = "http://localhost:3001/api/user/register";
       const data = {
         username: document.getElementById("username").value,
+        email: document.getElementById("email").value,
         password: document.getElementById("password").value,
       };
       fetch(url, {
