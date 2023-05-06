@@ -32,7 +32,27 @@ const getAllGameInfo = (req, res) => {
         res.status(200).send(response);
       })
       .catch(err => {
-        console.log(err);
+        res.status(500).send(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+// Set game state to active
+const setGameState = async (req, res) => {
+  try {
+    const id = req.query.id;
+    const active = req.query.active === 'true' ? true : false;
+
+    GameModel.findByIdAndUpdate(id, {
+      active: active
+    })
+      .then(response => {
+        res.status(200).send(response);
+      })
+      .catch(err => {
+        res.status(500).send(err);
       });
   } catch (err) {
     res.status(500).send(err);
@@ -42,7 +62,7 @@ const getAllGameInfo = (req, res) => {
 // Get new games
 const getNewGames = async (req, res) => {
   try {
-    GameModel.find({})
+    GameModel.find({ active: true })
       .sort({ create_date: -1 })
       .limit(10)
       .then(response => {
@@ -59,7 +79,7 @@ const getNewGames = async (req, res) => {
 // Get random games
 const getRandomGames = async (req, res) => {
   try {
-    const games = await GameModel.aggregate([{ $sample: { size: 10 } }]);
+    const games = await GameModel.aggregate({ active: true }, [{ $sample: { size: 10 } }]);
     res.status(200).send(games);
   } catch (err) {
     res.status(500).send(err);
@@ -70,7 +90,7 @@ const getRandomGames = async (req, res) => {
 const getGamesByCategory = async (req, res) => {
   try {
     const category = req.params.category;
-    GameModel.find({ category: category })
+    GameModel.find({ category: category, active: true })
       .sort({ create_date: -1 })
       .limit(10)
       .then(response => {
@@ -173,7 +193,7 @@ const deleteSourceCode = (id) => {
 };
 
 // Update game
-const updateGame = async (req, res) => {
+const updateGameInfo = async (req, res) => {
   try {
     const id = req.params.id;
     const newGame = req.body;
@@ -188,12 +208,34 @@ const updateGame = async (req, res) => {
       path: newGame.type === "Iframe link" ? newGame.link : "",
     });
 
-    deleteCoverImage(id);
-    if (oldGame.type === "HTML5") {
-      deleteSourceCode(id);
-    }
+    // deleteCoverImage(id);
+    // if (oldGame.type === "HTML5") {
+    //   deleteSourceCode(id);
+    // }
 
-    res.status(200).send("Modified game successfully!");
+    res.status(200).send("Update info successfully!");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const updateGameFiles = async (req, res) => {
+  try {
+    const id = req.params.id;
+    deleteSourceCode(id);
+
+    res.status(200).send("Delete files successfully!");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const updateGameCoverImage = async (req, res) => {
+  try {
+    const id = req.params.id;
+    deleteCoverImage(id);
+
+    res.status(200).send("Delete coverimages successfully!");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -204,10 +246,13 @@ module.exports = {
   getAllGameInfo,
   getNewGames,
   getRandomGames,
+  setGameState,
   getGamesByCategory,
   getGamesByCreator,
   getRunGameFile,
   getCoverImage,
   deleteGameById,
-  updateGame,
+  updateGameInfo,
+  updateGameFiles,
+  updateGameCoverImage,
 };

@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { gameFilesMiddleware } = require('../src/middlewares');
+const { gameFilesMiddleware, checkToken, authMiddleware, checkAdminMiddleware } = require('../src/middlewares');
 const { gameController } = require('../src/controllers');
 
 const router = express.Router();
@@ -19,9 +19,12 @@ router.get(
   gameController.getRunGameFile
 );
 router.get("/:id", gameController.getGameInfo);
-router.get("/", gameController.getAllGameInfo);
+router.get("/", checkToken, checkAdminMiddleware, gameController.getAllGameInfo);
 
-router.put("/:id", gameController.updateGame);
+router.put("/info/:id", gameController.updateGameInfo);
+router.put("/source-code/:id", gameController.updateGameFiles);
+router.put("/cover-image/:id", gameController.updateGameCoverImage);
+router.put('/state', gameController.setGameState);
 
 router.delete("/:id", gameController.deleteGameById);
 

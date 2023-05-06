@@ -10,7 +10,11 @@ const router = require("./routes");
 const app = express();
 const port = process.env.PORT;
 
-app.use(cors()); // enable CORS for all routes
+// app.use(cors()); // enable CORS for all routes
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));

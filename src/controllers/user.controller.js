@@ -8,13 +8,31 @@ const { UserModel } = require('../models');
 const getUser = (req, res) => {
   try {
     const id = req.query.id;
-    const user = id ? UserModel.findById(id) : UserModel.find({});
-    user.then(data => {
-      res.status(200).send(data);
-    }).catch(err => {
-      console.log(err);
-      res.status(500).send(err);
-    });
+    const projection = { password: 0 };
+    UserModel.findById(id, projection)
+      .then(data => {
+        res.status(200).send(data);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const getAllUsers = (req, res) => {
+  try {
+    const projection = { password: 0 };
+    UserModel.find({}, projection)
+      .then(data => {
+        res.status(200).send(data);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+      });
   } catch (err) {
     res.status(500).send(err);
   }
@@ -91,8 +109,7 @@ const login = (req, res) => {
 
 const createToken = (user) => {
   const payload = {
-    userId: user._id,
-    userName: user.username,
+    _id: user._id,
   };
 
   const options = {
@@ -110,9 +127,77 @@ const logout = (req, res) => {
   }
 };
 
+const updateUsername = async (req, res) => {
+  const id = req.query.id;
+  const newUsername = req.body.newUsername;
+
+  const existingUser = await UserModel.findOne({ username: newUsername });
+  if (existingUser) {
+    return res.status(409).send('This username already exists');
+  }
+
+  UserModel.findByIdAndUpdate(id, {
+    username: newUsername
+  })
+    .then(data => {
+      res.status(200).send('Update username successfully');
+    })
+    .catch(err => {
+      res.status(403).send('Update username failed');
+    });
+};
+
+const updateEmail = async (req, res) => {
+  const id = req.query.id;
+  const newEmail = req.body.newEmail;
+
+  const existingEmail = await UserModel.findOne({ email: newEmail });
+  if (existingEmail) {
+    return res.status(409).send('This email already exists');
+  }
+
+  UserModel.findByIdAndUpdate(id, {
+    email: newEmail
+  })
+    .then(data => {
+      res.status(200).send('Update email successfully');
+    })
+    .catch(err => {
+      res.status(403).send('Update email failed');
+    });
+};
+
+const updatePassword = async (req, res) => {
+  const id = req.query.id;
+  const currentPassword = req.body.password;
+  const newPassword = req.body.newPassword;
+
+  const checkPassword = await UserModel.findOne({
+    _id: id,
+    password: currentPassword,
+  });
+  if (!checkPassword) {
+    return res.status(409).send('Password incorrect');
+  }
+
+  UserModel.findByIdAndUpdate(id, {
+    password: newPassword
+  })
+    .then(data => {
+      res.status(200).send('Update password successfully');
+    })
+    .catch(err => {
+      res.status(403).send('Update password failed');
+    });
+};
+
 module.exports = {
   getUser,
+  getAllUsers,
   register,
   login,
   logout,
+  updateUsername,
+  updateEmail,
+  updatePassword,
 }

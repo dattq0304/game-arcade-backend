@@ -15,7 +15,7 @@ const uploadInfo = (req, res) => {
     category: req.body.category,
     description: req.body.description,
     control: req.body.control,
-    creator_id: "643ba6009bc9f67e3bef8dc3",
+    creator_id: req.body.creator_id,
     active: false,
     create_date: new Date().toISOString(),
     modified_date: new Date().toISOString(),

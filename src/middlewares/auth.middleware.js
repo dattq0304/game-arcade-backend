@@ -1,19 +1,7 @@
-const jwt = require('jsonwebtoken');
-
-const checkAuth = (req, res, next) => {
-  try {
-    const token = req.cookies.token;
-    if (!token) {
-      return res.status(401).send('Unauthorized');
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userData = decoded;
-
-    next();
-  } catch (err) {
-    return res.status(401).send('Unauthorized');
-  }
+const auth = (req, res, next) => {
+  const user = req.user;
+  if (req.query.id === user._id || user.role === 'admin') next();
+  else return res.status(401).send('Not available!');
 };
 
-module.exports = checkAuth;
+module.exports = auth;

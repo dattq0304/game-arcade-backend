@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Update Game</title>
+  </head>
+  <body>
+    <h1>Update Game</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="text" id="name" name="name" placeholder="name" />
+      <input type="text" id="category" name="category" placeholder="category" />
+      <input
+        type="text"
+        id="description"
+        name="description"
+        placeholder="description"
+      />
+      <input type="text" id="control" name="control" placeholder="control" />
+      <select id="type" name="type">
+        <option value="hide" selected hidden></option>
+        <option value="HTML5">HTML5</option>
+        <option value="Iframe link">Iframe link</option>
+      </select>
+      <input
+        type="text"
+        id="link"
+        name="link"
+        placeholder="link"
+        style="display: none"
+      />
+      <input
+        type="file"
+        id="source-code"
+        name="source-code"
+        webkitdirectory
+        directory
+        multiple
+        style="display: none"
+      />
+      <div id="listing"></div>
+      <div>
+        <label for="cover-image">Upload cover image:</label>
+        <input
+          type="file"
+          id="cover-image"
+          name="cover-image"
+          accept=".jpg, .jpeg, .png"
+        />
+      </div>
+      <button type="submit">Upload</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+    <script>
+      const form = document.getElementById("upload-form");
+      const nameInput = document.getElementById("name");
+      const categoryInput = document.getElementById("category");
+      const descriptionInput = document.getElementById("description");
+      const controlInput = document.getElementById("control");
+      const typeSelect = document.getElementById("type");
+      const linkInput = document.getElementById("link");
+      const filesInput = document.getElementById("source-code");
+      const coverImageFileInput = document.getElementById("cover-image");
+      const fileList = document.getElementById("listing");
+
+      let gameId = "";
+      let gameType = "";
+
+      typeSelect.addEventListener("change", (event) => {
+        const type = event.target.value;
+        if (type === "HTML5") {
+          filesInput.style.display = "block";
+          linkInput.style.display = "none";
+        } else if (type === "Iframe link") {
+          filesInput.style.display = "none";
+          linkInput.style.display = "block";
+        }
+      });
+
+      filesInput.addEventListener(
+        "change",
+        (event) => {
+          for (const file of event.target.files) {
+            const item = document.createElement("li");
+            item.textContent = file.webkitRelativePath;
+            fileList.appendChild(item);
+          }
+        },
+        false
+      );
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await uploadInfo();
+        console.log("type", gameType);
+        if (gameType === "HTML5") {
+          await uploadSourceCode();
+        }
+        await uploadCoverImage();
+      });
+
+      const uploadInfo = async () => {
+        const formData = new FormData();
+        formData.append("name", nameInput.value);
+        formData.append("category", categoryInput.value);
+        formData.append("description", descriptionInput.value);
+        formData.append("control", controlInput.value);
+        formData.append("type", typeSelect.value);
+
+        gameType = typeSelect.value;
+        if (gameType === "Iframe link") {
+          formData.append("link", linkInput.value);
+        }
+
+        console.log("gameId", gameId);
+        if (gameId === "") {
+          await fetch("http://localhost:3001/api/upload/info", {
+            method: "POST",
+            body: formData,
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              gameId = data._id;
+              console.log("type", gameType);
+              console.log("upload", data);
+            })
+            .catch((err) => console.log(err));
+        } else {
+          const urlencoded = new URLSearchParams(formData).toString();
+          await fetch(`http://localhost:3001/api/game/${gameId}`, {
+            method: "PUT",
+            body: urlencoded,
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+          })
+            .then((res) => res.text())
+            .then((data) => {
+              console.log("update", data);
+            })
+            .catch((err) => console.log(err));
+        }
+      };
+
+      const uploadSourceCode = async () => {
+        // Lấy thông tin file upload
+        const files = Array.from(filesInput.files);
+
+        // Tạo đối tượng ZIP và thêm các file vào
+        const zip = new JSZip();
+        await Promise.all(
+          files.map(async (file) => {
+            const data = await file.arrayBuffer();
+            zip.file(file.webkitRelativePath, data);
+          })
+        );
+
+        // Tạo file zip và gửi đến server Node.js
+        const zipData = await zip.generateAsync({ type: "arraybuffer" });
+        const zipFile = new File([zipData], "upload.zip");
+        const formData = new FormData();
+        formData.append("source-code", zipFile);
+
+        await fetch(`http://localhost:3001/api/upload/source-code/${gameId}`, {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.text())
+          .then((data) => console.log("source-code", data))
+          .catch((err) => console.log(err));
+      };
+
+      const uploadCoverImage = async () => {
+        const coverImageFile = coverImageFileInput.files[0];
+        const formData = new FormData();
+        formData.append("cover-image", coverImageFile);
+
+        await fetch(`http://localhost:3001/api/upload/cover-image/${gameId}`, {
+          method: "POST",
+          body: formData,
+        })
+          .then((res) => res.text())
+          .then((data) => console.log("corver-image", data))
+          .catch((err) => console.log(err));
+      };
+    </script>
+  </body>
+</html>
