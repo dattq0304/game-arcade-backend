@@ -62,9 +62,11 @@ const setGameState = async (req, res) => {
 // Get new games
 const getNewGames = async (req, res) => {
   try {
+    const size = req.query.size ? parseInt(req.query.size) : undefined;
+
     GameModel.find({ active: true })
       .sort({ create_date: -1 })
-      .limit(10)
+      .limit(size ? size : 10)
       .then(response => {
         res.status(200).send(response);
       })
@@ -79,7 +81,9 @@ const getNewGames = async (req, res) => {
 // Get random games
 const getRandomGames = async (req, res) => {
   try {
-    const games = await GameModel.aggregate({ active: true }, [{ $sample: { size: 10 } }]);
+    const size = req.query.size ? parseInt(req.query.size) : undefined;
+
+    const games = await GameModel.aggregate([{ $match: { active: true } }, { $sample: { size: size || 10 } }]);
     res.status(200).send(games);
   } catch (err) {
     res.status(500).send(err);
@@ -89,10 +93,12 @@ const getRandomGames = async (req, res) => {
 // Get games by category
 const getGamesByCategory = async (req, res) => {
   try {
+    const size = req.query.size ? parseInt(req.query.size) : undefined;
+
     const category = req.params.category;
     GameModel.find({ category: category, active: true })
       .sort({ create_date: -1 })
-      .limit(10)
+      .limit(size ? size : 10)
       .then(response => {
         res.status(200).send(response);
       })

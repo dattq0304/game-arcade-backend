@@ -26,6 +26,6 @@ router.put("/source-code/:id", gameController.updateGameFiles);
 router.put("/cover-image/:id", gameController.updateGameCoverImage);
 router.put('/state', gameController.setGameState);
 
-router.delete("/:id", gameController.deleteGameById);
+router.delete("/:id", checkToken, authMiddleware, gameController.deleteGameById);
 
 module.exports = router;

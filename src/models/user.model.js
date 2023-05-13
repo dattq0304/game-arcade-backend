@@ -15,7 +15,8 @@ const UserSchema = new Schema(
     username: String,
     password: String,
     email: String,
-    role: String
+    role: String,
+    create_date: String,
   },
   {
     collection: "Users",

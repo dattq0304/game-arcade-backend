@@ -34,5 +34,8 @@ router.get('/all', checkToken, checkAdminMiddleware, userController.getAllUsers)
 
 router.get('/', userController.getUser);
 
+// Delete user
+router.delete('/:id', userController.deleteUser);
+
 module.exports = router;
 

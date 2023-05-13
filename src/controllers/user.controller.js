@@ -60,6 +60,7 @@ const register = async (req, res) => {
       password: password,
       email: email,
       role: "user",
+      create_date: new Date().toISOString(),
     });
 
     if (newUser) {
@@ -76,6 +77,22 @@ const register = async (req, res) => {
     res.status(500).send(err);
   }
 }
+
+// Delete user
+const deleteUser = (req, res) => {
+  try {
+    const id = req.params.id;
+    UserModel.findByIdAndDelete(id)
+      .then((data) => {
+        res.status(200).send('Delete user successfully');
+      })
+      .catch((err) => {
+        res.status(500).send(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
 
 // Login
 const login = (req, res) => {
@@ -113,7 +130,7 @@ const createToken = (user) => {
   };
 
   const options = {
-    expiresIn: '240h',
+    expiresIn: '24h',
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET, options);
@@ -200,4 +217,5 @@ module.exports = {
   updateUsername,
   updateEmail,
   updatePassword,
+  deleteUser,
 }
