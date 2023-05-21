@@ -11,10 +11,11 @@ const app = express();
 const port = process.env.PORT;
 
 // app.use(cors()); // enable CORS for all routes
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}));
+const corsOptions = {
+  origin: [/localhost/, /\.ngrok-free\.app$/]
+};
+app.use(cors(corsOptions));
+
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
