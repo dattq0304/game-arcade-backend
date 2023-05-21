@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
+const path = require('path');
 // const bcrypt = require('bcrypt');
 // const saltRounds = 10;
 
 const { UserModel } = require('../models');
+const profileImagePath = path.join(process.env.PATH_TO_STORAGE, 'profile-image');
 
 // Get user info
 const getUser = (req, res) => {
@@ -18,6 +20,31 @@ const getUser = (req, res) => {
         res.status(500).send(err);
       });
   } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const getUserProfileImage = (req, res) => {
+  try {
+    const imagePath = path.join(profileImagePath, req.params.q + ".png");
+    res.status(200).sendFile(imagePath);
+  }
+  catch (err) {
+    res.status(500).send(err);
+  }
+};
+
+const changeUserProfileImage = (req, res) => {
+  try {
+    const id = req.params.id;
+    UserModel.findByIdAndUpdate(id, {
+      profile_image: req.body.profile_image
+    })
+      .then(data => {
+        res.status(200).send('Update profile image success!');
+      })
+  }
+  catch (err) {
     res.status(500).send(err);
   }
 };
@@ -61,6 +88,7 @@ const register = async (req, res) => {
       email: email,
       role: "user",
       create_date: new Date().toISOString(),
+      profile_image: Math.floor(Math.random() * 25) + 1
     });
 
     if (newUser) {
@@ -218,4 +246,6 @@ module.exports = {
   updateEmail,
   updatePassword,
   deleteUser,
+  getUserProfileImage,
+  changeUserProfileImage
 }

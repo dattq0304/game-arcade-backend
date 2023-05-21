@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get("/new", gameController.getNewGames);
 router.get("/random", gameController.getRandomGames);
+router.get("/search", gameController.searchGameByName);
 router.get("/category/:category", gameController.getGamesByCategory);
 router.get("/creator/:id", gameController.getGamesByCreator);
 router.get("/image/:id", gameController.getCoverImage);
@@ -21,9 +22,7 @@ router.get(
 router.get("/:id", gameController.getGameInfo);
 router.get("/", checkToken, checkAdminMiddleware, gameController.getAllGameInfo);
 
-router.put("/info/:id", gameController.updateGameInfo);
-router.put("/source-code/:id", gameController.updateGameFiles);
-router.put("/cover-image/:id", gameController.updateGameCoverImage);
+router.put("/update/:id", gameController.updateGame);
 router.put('/state', gameController.setGameState);
 
 router.delete("/:id", checkToken, authMiddleware, gameController.deleteGameById);

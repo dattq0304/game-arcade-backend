@@ -39,6 +39,24 @@ const getAllGameInfo = (req, res) => {
   }
 };
 
+// Search game by name
+const searchGameByName = (req, res) => {
+  try {
+    const size = req.query.size ? parseInt(req.query.size) : undefined;
+    const regex = new RegExp(req.query.q, 'i');
+    GameModel.find({ name: regex })
+      .limit(size ? size : 10)
+      .then(response => {
+        res.status(200).send(response);
+      })
+      .catch(err => {
+        res.status(500).send(err);
+      });
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 // Set game state to active
 const setGameState = async (req, res) => {
   try {
@@ -199,7 +217,7 @@ const deleteSourceCode = (id) => {
 };
 
 // Update game
-const updateGameInfo = async (req, res) => {
+const updateGame = async (req, res) => {
   try {
     const id = req.params.id;
     const newGame = req.body;
@@ -210,14 +228,15 @@ const updateGameInfo = async (req, res) => {
       description: newGame.description,
       control: newGame.control,
       modified_date: new Date().toISOString(),
+      active: false,
       type: newGame.type,
       path: newGame.type === "Iframe link" ? newGame.link : "",
     });
 
-    // deleteCoverImage(id);
-    // if (oldGame.type === "HTML5") {
-    //   deleteSourceCode(id);
-    // }
+    deleteCoverImage(id);
+    if (oldGame.type === "HTML5") {
+      deleteSourceCode(id);
+    }
 
     res.status(200).send("Update info successfully!");
   } catch (err) {
@@ -225,27 +244,27 @@ const updateGameInfo = async (req, res) => {
   }
 };
 
-const updateGameFiles = async (req, res) => {
-  try {
-    const id = req.params.id;
-    deleteSourceCode(id);
+// const updateGameFiles = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     deleteSourceCode(id);
 
-    res.status(200).send("Delete files successfully!");
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
+//     res.status(200).send("Delete files successfully!");
+//   } catch (err) {
+//     res.status(500).send(err);
+//   }
+// };
 
-const updateGameCoverImage = async (req, res) => {
-  try {
-    const id = req.params.id;
-    deleteCoverImage(id);
+// const updateGameCoverImage = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     deleteCoverImage(id);
 
-    res.status(200).send("Delete coverimages successfully!");
-  } catch (err) {
-    res.status(500).send(err);
-  }
-};
+//     res.status(200).send("Delete coverimages successfully!");
+//   } catch (err) {
+//     res.status(500).send(err);
+//   }
+// };
 
 module.exports = {
   getGameInfo,
@@ -258,7 +277,9 @@ module.exports = {
   getRunGameFile,
   getCoverImage,
   deleteGameById,
-  updateGameInfo,
-  updateGameFiles,
-  updateGameCoverImage,
+  // updateGameInfo,
+  // updateGameFiles,
+  // updateGameCoverImage,
+  updateGame,
+  searchGameByName,
 };

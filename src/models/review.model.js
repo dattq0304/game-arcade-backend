@@ -10,20 +10,18 @@ mongoose.connect(databaseUrl, {
   useUnifiedTopology: true,
 });
 
-const UserSchema = new Schema(
+const ReviewSchema = new Schema(
   {
-    username: String,
-    password: String,
-    email: String,
-    role: String,
-    create_date: String,
-    profile_image: String,
+    user_id: String,
+    game_id: String,
+    like: Boolean,
+    date: String,
   },
   {
-    collection: "Users",
+    collection: "Reviews",
   }
 );
 
-const UserModel = mongoose.model("Users", UserSchema);
+const ReviewModel = mongoose.model("Reviews", ReviewSchema);
 
-module.exports = UserModel;
+module.exports = ReviewModel;

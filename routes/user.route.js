@@ -25,6 +25,9 @@ router.get('/auth', checkToken, (req, res) => {
   res.status(200).send(req.userId);
 })
 
+router.get('/image/:q', userController.getUserProfileImage);
+router.put('/image/:id', checkToken, userController.changeUserProfileImage);
+
 // authMiddleware
 router.put('/update/username', userController.updateUsername);
 router.put('/update/email', userController.updateEmail);

@@ -4,6 +4,7 @@ const express = require("express");
 const gameRouter = require("./game.route");
 const uploadRouter = require("./upload.route");
 const userRouter = require("./user.route");
+const reviewRouter = require("./review.route");
 
 const router = express.Router();
 
@@ -11,5 +12,6 @@ const router = express.Router();
 router.use("/game", gameRouter);
 router.use("/upload", uploadRouter);
 router.use("/user", userRouter);
+router.use("/review", reviewRouter);
 
 module.exports = router;
