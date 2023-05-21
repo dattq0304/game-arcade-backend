@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 require("dotenv").config();
-const cors = require("cors");
+// const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 
@@ -11,11 +11,15 @@ const app = express();
 const port = process.env.PORT;
 
 // app.use(cors()); // enable CORS for all routes
-const corsOptions = {
-  origin: [/localhost/, /\.ngrok-free\.app$/]
-};
-app.use(cors(corsOptions));
-
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true
+// }));
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(bodyParser.urlencoded({ extended: true }));
