@@ -1,12 +1,13 @@
 const express = require("express");
 
 const { gameFilesMiddleware, checkToken, authMiddleware, checkAdminMiddleware } = require('../src/middlewares');
-const { gameController } = require('../src/controllers');
+const { gameController, reviewController } = require('../src/controllers');
 
 const router = express.Router();
 
 router.get("/new", gameController.getNewGames);
 router.get("/random", gameController.getRandomGames);
+router.get("/topRated", reviewController.getTopRated);
 router.get("/search", gameController.searchGameByName);
 router.get("/category/:category", gameController.getGamesByCategory);
 router.get("/creator/:id", gameController.getGamesByCreator);

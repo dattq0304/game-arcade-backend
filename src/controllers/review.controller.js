@@ -53,7 +53,36 @@ const postReview = async (req, res) => {
   }
 };
 
+
+const getTopRated = async (req, res) => {
+  try {
+    ReviewModel.aggregate([
+      {
+        $group: {
+          _id: '$game_id',
+          likes: { $sum: { $cond: [{ $eq: ['$like', true] }, 1, 0] } },
+        },
+      },
+      {
+        $match: { likes: { $gt: 0 } },
+      },
+      {
+        $sort: { likes: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ])
+      .then((result) => {
+        res.status(200).send(result);
+      })
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
+
 module.exports = {
   getReviews,
-  postReview
+  postReview,
+  getTopRated
 };
