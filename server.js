@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development' });
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
