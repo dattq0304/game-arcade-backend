@@ -10,4 +10,6 @@ router.get('/:id', reviewController.getReviews);
 
 router.post('/:id', checkToken, reviewController.postReview);
 
+router.delete('/:id', checkToken, reviewController.deleteReview);
+
 module.exports = router;

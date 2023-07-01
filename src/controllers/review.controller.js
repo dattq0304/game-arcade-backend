@@ -2,7 +2,7 @@ const { ReviewModel } = require("../models");
 
 const getReviews = (req, res) => {
   try {
-    ReviewModel.find({ game_id: req.params.id })
+    ReviewModel.find({ game_id: req.params.id }).sort({ date: -1 })
       .then((review) => {
         res.status(200).send(review);
       })
@@ -15,67 +15,77 @@ const postReview = async (req, res) => {
   try {
     const gameId = req.params.id;
     const userId = req.userId;
-    if (req.query.like === 'null') {
-      ReviewModel.findOneAndDelete({
+    const existingReview = await ReviewModel.findOne({
+      game_id: gameId,
+      user_id: userId
+    });
+    if (existingReview) {
+      const data = await ReviewModel.findOneAndUpdate({
         game_id: gameId,
         user_id: userId
-      })
-        .then(data => {
-          res.status(200).send(data);
-        })
-    }
-    else {
-      let data;
-      const existingReview = await ReviewModel.findOne({
-        game_id: gameId,
-        user_id: userId
+      }, {
+        star: req.body.star,
+        content: req.body.content,
+        date: new Date().toISOString(),
       });
-      if (existingReview) {
-        data = await ReviewModel.findOneAndUpdate({
-          game_id: gameId,
-          user_id: userId
-        }, {
-          like: req.query.like === 'true' ? true : false,
-          date: new Date().toISOString(),
-        })
-      } else {
-        data = await ReviewModel.create({
-          game_id: gameId,
-          user_id: userId,
-          like: req.query.like === 'true' ? true : false,
-          date: new Date().toISOString(),
-        })
-      }
-      res.status(200).send(data);
+      res.status(200).send({
+        data: data,
+        type: "update"
+      });
+    } else {
+      const data = await ReviewModel.create({
+        game_id: gameId,
+        user_id: userId,
+        star: req.body.star,
+        content: req.body.content,
+        date: new Date().toISOString(),
+      });
+      res.status(200).send({
+        data: data,
+        type: "create"
+      });
     }
   } catch (err) {
     res.status(500).send(err);
   }
 };
 
+const deleteReview = async (req, res) => {
+  try {
+    const gameId = req.params.id;
+    const userId = req.userId;
+    console.log(userId, gameId);
+    const result = await ReviewModel.findOneAndDelete({
+      user_id: userId,
+      game_id: gameId
+    });
+    console.log(result);
+    res.status(200).send("Delete suscces");
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
 
 const getTopRated = async (req, res) => {
   try {
-    ReviewModel.aggregate([
+    const result = await ReviewModel.aggregate([
+      { $match: { star: { $exists: true }, content: { $ne: null } } },
       {
         $group: {
-          _id: '$game_id',
-          likes: { $sum: { $cond: [{ $eq: ['$like', true] }, 1, 0] } },
+          _id: "$game_id",
+          totalStars: { $sum: "$star" },
+          totalReviews: { $sum: 1 },
         },
       },
+      { $match: { totalReviews: { $gt: 0 } } },
       {
-        $match: { likes: { $gt: 0 } },
+        $addFields: {
+          avgStar: { $divide: ["$totalStars", "$totalReviews"] },
+        },
       },
-      {
-        $sort: { likes: -1 },
-      },
-      {
-        $limit: 10,
-      },
-    ])
-      .then((result) => {
-        res.status(200).send(result);
-      })
+      { $sort: { avgStar: -1 } },
+    ]);
+    res.status(200).send(result);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -84,5 +94,6 @@ const getTopRated = async (req, res) => {
 module.exports = {
   getReviews,
   postReview,
-  getTopRated
+  getTopRated,
+  deleteReview
 };

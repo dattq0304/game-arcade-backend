@@ -14,7 +14,8 @@ const ReviewSchema = new Schema(
   {
     user_id: String,
     game_id: String,
-    like: Boolean,
+    star: Number,
+    content: String,
     date: String,
   },
   {
